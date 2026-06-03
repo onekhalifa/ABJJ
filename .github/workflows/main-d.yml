@@ -1,0 +1,130 @@
+name: Deterministic uidd Core v22.1 Build (Ubuntu 22.04)
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Git Ref (Tag, Branch, or Commit)'
+        required: true
+        default: 'v22.1'
+
+jobs:
+  build-linux:
+    name: Build ${{ matrix.host }}
+    runs-on: ubuntu-latest
+    
+    # 1. Container Pinning (Updated to Ubuntu 22.04 LTS Jammy)
+    # This locks down the exact SHA256 digest for the Ubuntu 22.04 base image.
+    container: ubuntu@sha256:2b74ae3ecda0e3a6c9053fa04b901a884639906d20377484df0076bb9fdfb6e1
+
+    strategy:
+      fail-fast: false
+      matrix:
+        host:
+          - x86_64-linux-gnu
+
+    env:
+      DEBIAN_FRONTEND: noninteractive
+      TZ: UTC
+
+    steps:
+      - name: Install System Prerequisites
+        run: apt-get update && apt-get install -y git
+
+      - name: Checkout uidd Core Repository
+        uses: actions/checkout@v4
+        with:
+          repository: onekhalifa/ABJJ
+          ref: ${{ github.event.inputs.ref }}
+          fetch-depth: 0
+
+      - name: Define SOURCE_DATE_EPOCH
+        run: |
+          COMMIT_TIME=$(git log -1 --format=%ct)
+          echo "SOURCE_DATE_EPOCH=$COMMIT_TIME" >> $GITHUB_ENV
+
+      - name: Install Build Dependencies (Updated for Ubuntu 22.04)
+        run: |
+          apt-get update
+          # Switched from gcc-8/g++-8 to the native gcc-11/g++-11 toolchain available in 22.04
+          apt-get install -y autoconf automake binutils bison bsdmainutils \
+                             ca-certificates curl g++-11 gcc-11 libtool patch \
+                             pkg-config python3 python3-pip
+          
+          pip3 install lief==0.11.5
+
+      - name: Build Deterministic Dependencies (depends system)
+        run: |
+          # Enforce compiler choice explicitly to GCC 11
+          make -j$(nproc) -C depends HOST=${{ matrix.host }} CC=gcc-11 CXX=g++-11
+
+      - name: Configure and Compile uidd Core
+        run: |
+          ./autogen.sh
+          
+          CONFIGFLAGS="--enable-glibc-back-compat --enable-reduce-exports --disable-bench --disable-gui-tests --disable-fuzz-binary"
+          
+          HOST_CFLAGS="-O2 -g -ffile-prefix-map=$PWD=."
+          HOST_CXXFLAGS="-O2 -g -ffile-prefix-map=$PWD=."
+          HOST_LDFLAGS="-static-libstdc++ -Wl,-O2"
+
+          CONFIG_SITE=$PWD/depends/${{ matrix.host }}/share/config.site \
+          ./configure --prefix=/ \
+                      --disable-ccache \
+                      --disable-maintainer-mode \
+                      --disable-dependency-tracking \
+                      $CONFIGFLAGS \
+                      CFLAGS="$HOST_CFLAGS" \
+                      CXXFLAGS="$HOST_CXXFLAGS" \
+                      LDFLAGS="$HOST_LDFLAGS" \
+                      CC=gcc-11 CXX=g++-11
+
+          make -j$(nproc)
+
+      - name: Isolate Binaries and Split Debug Symbols
+        run: |
+          DISTNAME="uidd-${{ github.event.inputs.ref }}"
+          INSTALLPATH="$PWD/installed/$DISTNAME"
+          mkdir -p $INSTALLPATH
+          
+          make install DESTDIR=$INSTALLPATH
+          cd installed
+          
+          find . -name "lib*.la" -delete
+          find . -name "lib*.a" -delete
+          rm -rf $DISTNAME/lib/pkgconfig
+          
+          find $DISTNAME/bin -type f -executable -print0 | xargs -0 -n1 -I{} ../contrib/devtools/split-debug.sh {} {} {}.dbg
+          find $DISTNAME/lib -type f -print0 | xargs -0 -n1 -I{} ../contrib/devtools/split-debug.sh {} {} {}.dbg
+
+      - name: Create Deterministic Archives
+        run: |
+          cd installed
+          DISTNAME="uidd-${{ github.event.inputs.ref }}"
+          
+          find $DISTNAME -not -name "*.dbg" | LC_ALL=C sort | tar \
+            --mtime="@${SOURCE_DATE_EPOCH}" \
+            --no-recursion \
+            --mode='u+rw,go+r-w,a+X' \
+            --owner=0 --group=0 --numeric-owner \
+            -c -T - | gzip -9n > ../${DISTNAME}-${{ matrix.host }}.tar.gz
+            
+          find $DISTNAME -name "*.dbg" | LC_ALL=C sort | tar \
+            --mtime="@${SOURCE_DATE_EPOCH}" \
+            --no-recursion \
+            --mode='u+rw,go+r-w,a+X' \
+            --owner=0 --group=0 --numeric-owner \
+            -c -T - | gzip -9n > ../${DISTNAME}-${{ matrix.host }}-debug.tar.gz
+
+      - name: Generate Checksums
+        run: |
+          sha256sum *.tar.gz > SHA256SUMS.txt
+          cat SHA256SUMS.txt
+
+      - name: Upload Release Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: uidd-${{ matrix.host }}-release
+          path: |
+            *.tar.gz
+            SHA256SUMS.txt
