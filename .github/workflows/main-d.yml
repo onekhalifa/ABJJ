@@ -59,11 +59,13 @@ jobs:
 
       - name: Build Deterministic Dependencies (depends system)
         run: |
+          chmod +x depends
           # Enforce compiler choice explicitly to GCC 11
           make -j$(nproc) -C depends HOST=${{ matrix.host }} CC=gcc-11 CXX=g++-11
 
       - name: Configure and Compile uidd Core
         run: |
+          chmod +x .
           ./autogen.sh
           
           CONFIGFLAGS="--enable-glibc-back-compat --enable-reduce-exports --disable-bench --disable-gui-tests --disable-fuzz-binary"
