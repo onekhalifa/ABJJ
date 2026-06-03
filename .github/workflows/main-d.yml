@@ -40,6 +40,10 @@ jobs:
 
       - name: Define SOURCE_DATE_EPOCH
         run: |
+          # Tell Git that the GitHub workspace directory is safe despite user mismatch
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          
+          # Extract the exact timestamp of the commit being built
           COMMIT_TIME=$(git log -1 --format=%ct)
           echo "SOURCE_DATE_EPOCH=$COMMIT_TIME" >> $GITHUB_ENV
 
