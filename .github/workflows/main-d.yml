@@ -57,6 +57,11 @@ jobs:
           
           pip3 install lief==0.11.5
 
+      - name: Workaround for broken GMP download URL
+        run: |
+          mkdir -p depends/sources
+          curl -L "https://ftp.gnu.org/gnu/gmp/gmp-6.1.2.tar.xz" -o depends/sources/gmp-6.1.2.tar.xz
+        
       - name: Build Deterministic Dependencies (depends system)
         run: |
           chmod -R +x .
