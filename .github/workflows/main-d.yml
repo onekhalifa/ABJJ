@@ -11,11 +11,11 @@ on:
 jobs:
   build-linux:
     name: Build ${{ matrix.host }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu:22.04
     
     # 1. Container Pinning (Updated to Ubuntu 22.04 LTS Jammy)
     # This locks down the exact SHA256 digest for the Ubuntu 22.04 base image.
-    container: ubuntu@sha256:2b74ae3ecda0e3a6c9053fa04b901a884639906d20377484df0076bb9fdfb6e1
+    container: ubuntu@sha256:a6d2b38300adab1f24097486e90069ee73b6479f64bf3ca489674f1797f1fbc2
 
     strategy:
       fail-fast: false
