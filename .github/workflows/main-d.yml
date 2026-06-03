@@ -59,18 +59,18 @@ jobs:
 
       - name: Install and Set GCC 9
         run: |
-          sudo apt-get install -y gcc-9 g++-9
-          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 100
-          sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-9 100
+          apt-get install -y gcc-9 g++-9
+          update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 100
+          update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-9 100
           gcc --version
     # NEW STEP GOES HERE
     
       - name: Downgrade Autoconf to 2.69
         run: |
-          sudo apt-get install -y autoconf2.69
-          sudo update-alternatives --install /usr/bin/autoconf autoconf /usr/bin/autoconf2.69 100
-          sudo update-alternatives --install /usr/bin/autoreconf autoreconf /usr/bin/autoreconf2.69 100
-          sudo update-alternatives --install /usr/bin/autoheader autoheader /usr/bin/autoheader2.69 100
+          apt-get install -y autoconf2.69
+          update-alternatives --install /usr/bin/autoconf autoconf /usr/bin/autoconf2.69 100
+          update-alternatives --install /usr/bin/autoreconf autoreconf /usr/bin/autoreconf2.69 100
+          update-alternatives --install /usr/bin/autoheader autoheader /usr/bin/autoheader2.69 100
           autoconf --version
           
       - name: Workaround for broken GMP download URL
