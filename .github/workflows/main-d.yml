@@ -15,7 +15,7 @@ jobs:
     
     # 1. Container Pinning (Updated to Ubuntu 22.04 LTS Jammy)
     # This locks down the exact SHA256 digest for the Ubuntu 22.04 base image.
-    container: ubuntu@sha256:a6d2b38300adab1f24097486e90069ee73b6479f64bf3ca489674f1797f1fbc2
+    container: ubuntu:22.04
 
     strategy:
       fail-fast: false
