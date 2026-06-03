@@ -104,7 +104,7 @@ jobs:
                       CFLAGS="$HOST_CFLAGS" \
                       CXXFLAGS="$HOST_CXXFLAGS" \
                       LDFLAGS="$HOST_LDFLAGS" \
-                      CC=gcc-11 CXX=g++-11
+                      CC=gcc-9 CXX=g++-9
 
           make -j$(nproc)
 
