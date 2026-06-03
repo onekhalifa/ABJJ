@@ -82,7 +82,7 @@ jobs:
         run: |
           chmod -R +x .
           # Enforce compiler choice explicitly to GCC 11
-          make -j$(nproc) -C depends HOST=${{ matrix.host }} CC=gcc-9 CXX=g++-9
+          make -j$(nproc) -C depends HOST=${{ matrix.host }}
 
       - name: Configure and Compile uidd Core
         run: |
