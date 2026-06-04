@@ -40,7 +40,7 @@ jobs:
     - name: Install Build Dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y sudo apt-get install make automake cmake curl g++-multilib libtool binutils-gold bsdmainutils pkg-config python3
+        sudo apt-get install -y make automake cmake curl g++-multilib libtool binutils-gold bsdmainutils pkg-config python3
     - name: Install Arm64 Cross-Compilers
       if: matrix.host == 'aarch64-linux-gnu'
       run: |
