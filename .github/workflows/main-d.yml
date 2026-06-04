@@ -53,7 +53,7 @@ jobs:
           # Switched from gcc-8/g++-8 to the native gcc-11/g++-11 toolchain available in 22.04
           apt-get install -y autoconf automake binutils bison bsdmainutils \
                              ca-certificates curl g++-9 gcc-9 libtool patch \
-                             pkg-config python3 python3-pip
+                             pkg-config python3 python3-pip libgmp-dev
           
           pip3 install lief==0.11.5
 
