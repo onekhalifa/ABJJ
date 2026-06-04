@@ -1,4 +1,4 @@
-name: ABJJ LINUX
+name: ABJJ LINUX BUILD
 
 on:
   push:
@@ -40,12 +40,16 @@ jobs:
     - name: Install Build Dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y build-essential libtool autotools-dev automake pkg-config bsdmainutils python3 libgmp-dev
-
-    - name: Install Cross-Compilers
-      if: matrix.host != 'x86_64-pc-linux-gnu'
+        sudo apt-get install -y sudo apt-get install make automake cmake curl g++-multilib libtool binutils-gold bsdmainutils pkg-config python3
+    - name: Install Arm64 Cross-Compilers
+      if: matrix.host == 'aarch64-linux-gnu'
       run: |
-        sudo apt-get install -y g++-arm-linux-gnueabihf g++-aarch64-linux-gnu
+        sudo apt-get install -y g++-aarch64-linux-gnu binutils-aarch64-linux-gnu
+
+    - name: Install Risc Cross-Compilers
+      if: matrix.host == 'riscv64-linux-gnu'
+      run: |
+        sudo apt-get install -y g++-riscv64-linux-gnu binutils-riscv64-linux-gnu
 
     - name: Install and Set GCC 9
       if: matrix.host == 'x86_64-pc-linux-gnu'
