@@ -17,7 +17,7 @@ jobs:
         host:
           - x86_64-pc-linux-gnu
           - aarch64-linux-gnu
-          - risc64-linux-gnu
+          - riscv64-linux-gnu
 
     steps:
     - name: Checkout repository
