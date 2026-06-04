@@ -59,6 +59,24 @@ jobs:
         sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-9 100
         gcc --version
 
+    - name: Install and Set GCC 9 arm
+      if: matrix.host == 'aarch64-linux-gnu'
+      run: |
+        sudo apt-get install -y gcc-9-aarch64-linux-gnu g++-9-aarch64-linux-gnu
+        # Set ARM64 defaults to GCC 9
+        sudo update-alternatives --install /usr/bin/aarch64-linux-gnu-gcc aarch64-linux-gnu-gcc /usr/bin/aarch64-linux-gnu-gcc-9 100
+        sudo update-alternatives --install /usr/bin/aarch64-linux-gnu-g++ aarch64-linux-gnu-g++ /usr/bin/aarch64-linux-gnu-g++-9 100
+        gcc --version
+
+    - name: Install and Set GCC 9 risc
+      if: matrix.host == 'riscv64-linux-gnu'
+      run: |
+         sudo apt-get install -y gcc-9-riscv64-linux-gnu g++-9-riscv64-linux-gnu
+         # Set ARM64 defaults to GCC 9
+         sudo update-alternatives --install /usr/bin/riscv64-linux-gnu-gcc riscv64-linux-gnu-gcc /usr/bin/riscv64-linux-gnu-gcc-9 100
+         sudo update-alternatives --install /usr/bin/riscv64-linux-gnu-g++ riscv64-linux-gnu-g++ /usr/bin/riscv64-linux-gnu-g++-9 100
+         gcc --version
+
     - name: Downgrade Autoconf to 2.69
       run: |
         sudo apt-get install -y autoconf2.69
